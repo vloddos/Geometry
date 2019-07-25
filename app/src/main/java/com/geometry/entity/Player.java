@@ -1,4 +1,4 @@
-package com.geometry;
+package com.geometry.entity;
 
 public class Player {
 
