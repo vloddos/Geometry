@@ -2,16 +2,16 @@ package com.geometry.figure;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PointF;
 
 public abstract class Figure {
 
-    public float cx, cy;
     protected Paint paint;
+    public PointF cpoint;
     public float square;
 
-    public Figure(float cx, float cy, float square, Paint paint) {
-        this.cx = cx;
-        this.cy = cy;
+    public Figure(PointF cpoint, float square, Paint paint) {
+        this.cpoint = cpoint;
         this.square = square;
         this.paint = paint;
     }

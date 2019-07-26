@@ -1,4 +1,4 @@
-package com.geometry;
+package com.geometry.example;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

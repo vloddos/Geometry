@@ -1,17 +1,16 @@
 package com.geometry.entity;
 
+import com.geometry.figure.Figure;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Player {
 
-    private static Player instance;
+    public Lock cpointLock = new ReentrantLock();
+    public Figure figure;
 
-    public static Player getInstance() {
-        if (instance == null)
-            instance = new Player();
-        return instance;
-    }
-
-    public float x, y, radius;
-
-    private Player() {
+    public Player(Figure figure) {
+        this.figure = figure;
     }
 }

@@ -14,4 +14,19 @@ public class ExampleUnitTest {
     public void addition_isCorrect() {
         assertEquals(4, 2 + 2);
     }
+
+    @Test
+    public void switchTest() {
+        int a = 3;
+        switch (a) {
+            default:
+                System.out.println("default");
+            case 2:
+                System.out.println("down to 2");
+                System.out.println(2);
+            case 3:
+                System.out.println("down to 3");
+                System.out.println(3);
+        }
+    }
 }

@@ -1,18 +1,18 @@
-package com.geometry;
+package com.geometry.activity;
 
 import android.os.Bundle;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.geometry.CustomSurfaceView;
+import com.geometry.R;
 
 public class MainActivity extends AppCompatActivity {
 
     private LinearLayout linearLayout;
     private CustomSurfaceView customSurfaceView;
-    private SurfaceView surfaceView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,12 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
         linearLayout = findViewById(R.id.linearLayout);
         customSurfaceView = new CustomSurfaceView(getApplicationContext());
-
-
-        /*customSurfaceView.getLayoutParams().width = linearLayout.getLayoutParams().width;
-        customSurfaceView.getLayoutParams().height = linearLayout.getLayoutParams().height;*/
         linearLayout.addView(customSurfaceView);
-
         customSurfaceView.setLayoutParams(//onstart???
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
@@ -63,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Shows the system bars by removing all the flags
-// except for the ones that make the content appear under the system bars.
+    // except for the ones that make the content appear under the system bars.
     private void showSystemUI() {
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(

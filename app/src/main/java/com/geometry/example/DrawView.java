@@ -1,4 +1,4 @@
-package com.geometry;
+package com.geometry.example;
 
 import android.content.Context;
 import android.view.SurfaceView;
