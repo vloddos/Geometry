@@ -9,6 +9,7 @@ import android.view.SurfaceView;
 import android.view.View;
 
 import com.geometry.thread.DrawThread;
+import com.geometry.thread.EntityThread;
 
 // TODO: 26.07.2019 как правильно делать lockCanvas???
 // TODO: 23.07.2019 check borders
@@ -20,6 +21,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     private SurfaceHolder surfaceHolder;
 
     private DrawThread drawThread;
+    private EntityThread entityThread;
 
     public CustomSurfaceView(Context context) {
         super(context);
@@ -42,8 +44,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                 try {
                     Global.player = Global.entityGenerator.generatePlayer(
                             new PointF(
-                                    (float) canvas.getWidth() / 2,
-                                    (float) canvas.getHeight() / 2
+                                    (float) ((Global.width = canvas.getWidth()) / 2),
+                                    (float) ((Global.height = canvas.getHeight()) / 2)
                             )
                     );
                     retry = false;
@@ -54,6 +56,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
         drawThread = new DrawThread(getHolder());//fixme surfaceHolder???
         drawThread.start();
+        entityThread = new EntityThread();
+        entityThread.start();
     }
 
     @Override
@@ -62,6 +66,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        entityThread.cancel();
         drawThread.cancel();
 
         boolean retry = true;
@@ -81,12 +86,12 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         if (v instanceof SurfaceView)
             switch (event.getAction()) {//todo check
                 default:
-                    Global.player.cpointLock.lock();
+                    Global.player.lock.lock();
                     try {
                         Global.player.figure.cpoint.x += event.getX() - x;
                         Global.player.figure.cpoint.y += event.getY() - y;
                     } finally {
-                        Global.player.cpointLock.unlock();
+                        Global.player.lock.unlock();
                     }
                 case MotionEvent.ACTION_DOWN:
                     x = event.getX();

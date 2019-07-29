@@ -1,5 +1,7 @@
 package com.geometry.entity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.graphics.Color;
@@ -14,17 +16,17 @@ import com.geometry.figure.Triangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
 
-// TODO: 25.07.2019 fix square coefs
 public class EntityGenerator {
 
-    private final float SQUARE_COEF_MIN = 0.1f;
-    private final float SQUARE_COEF_MAX = 5f;
+    private final float SQUARE_COEF_MIN = 0.01f;
+    private final float SQUARE_COEF_MAX = 25f;
     private final int RGB_MIN = 80;
     private final int RGB_MAX = 220;
     private final long DURATION_MIN = 2000;
     private final long DURATION_MAX = 7000;
-    private final float PLAYER_BASE_SQUARE = 400;
+    public final float PLAYER_BASE_SQUARE = 400;
 
     private Random random = new Random();
 
@@ -61,20 +63,45 @@ public class EntityGenerator {
         return DURATION_MIN + random.nextInt((int) (DURATION_MAX - DURATION_MIN + 1));
     }
 
-    public ValueAnimator generateAnimator(Figure figure, PointF start, PointF end) {
-        ValueAnimator animator = new ValueAnimator();
-        animator.setValues(
-                PropertyValuesHolder.ofFloat("cx", start.x, end.x),
-                PropertyValuesHolder.ofFloat("cy", start.y, end.y)
+    public void generateAndSetAnimator(Enemy enemy) {
+        enemy.animator = new ValueAnimator();
+        enemy.animator.setValues(
+                PropertyValuesHolder.ofFloat("cx", enemy.start.x, enemy.end.x),
+                PropertyValuesHolder.ofFloat("cy", enemy.start.y, enemy.end.y)
         );
-        animator.setDuration(generateDuration());
-        animator.addUpdateListener(
+        enemy.animator.setDuration(generateDuration());
+        enemy.animator.addUpdateListener(
                 animation -> {
-                    figure.cpoint.x = (float) animation.getAnimatedValue("cx");
-                    figure.cpoint.y = (float) animation.getAnimatedValue("cy");
+                    enemy.lock.lock();
+                    try {
+                        enemy.figure.cpoint.x = (float) animation.getAnimatedValue("cx");
+                        enemy.figure.cpoint.y = (float) animation.getAnimatedValue("cy");
+                    } finally {
+                        enemy.lock.unlock();
+                    }
                 }
         );
-        return animator;
+        enemy.animator.addListener(
+                new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationCancel(Animator animation) {//redundant???
+                        super.onAnimationCancel(animation);
+                        if (enemy.lock.isHeldByCurrentThread())
+                            enemy.lock.unlock();
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        enemy.lock.lock();
+                        try {
+                            enemy.alive = false;
+                        } finally {
+                            enemy.lock.unlock();
+                        }
+                    }
+                }
+        );
     }
 
     public Player generatePlayer(PointF cpoint) {
@@ -82,10 +109,7 @@ public class EntityGenerator {
         paint.setColor(Color.WHITE);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-        return
-                new Player(
-                        generateFigure(cpoint, PLAYER_BASE_SQUARE, paint)
-                );
+        return new Player(generateFigure(cpoint, PLAYER_BASE_SQUARE, paint));
     }
 
     // FIXME: 26.07.2019 как передавать width/height???
@@ -101,13 +125,11 @@ public class EntityGenerator {
                 end = pointFS.remove(random.nextInt(3));
 
         Figure figure = generateFigure(start, generateSquare(square), generatePaint());
+        ReentrantLock lock = new ReentrantLock();
 
-        return
-                new Enemy(
-                        start,
-                        end,
-                        figure,
-                        generateAnimator(figure, start, end)
-                );
+        Enemy enemy = new Enemy(start, end, figure, lock);
+        generateAndSetAnimator(enemy);
+
+        return enemy;
     }
 }

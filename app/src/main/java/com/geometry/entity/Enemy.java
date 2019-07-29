@@ -5,16 +5,20 @@ import android.graphics.PointF;
 
 import com.geometry.figure.Figure;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Enemy {
 
-    private PointF start, end;
-    private Figure figure;
-    private ValueAnimator animator;
+    public PointF start, end;
+    public Figure figure;
+    public ValueAnimator animator;
+    public ReentrantLock lock;
+    public boolean alive = true;
 
-    public Enemy(PointF start, PointF end, Figure figure, ValueAnimator animator) {
+    public Enemy(PointF start, PointF end, Figure figure, ReentrantLock lock) {
         this.start = start;
         this.end = end;
         this.figure = figure;
-        this.animator = animator;
+        this.lock = lock;
     }
 }
