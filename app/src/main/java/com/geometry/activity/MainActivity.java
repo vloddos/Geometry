@@ -20,9 +20,34 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         linearLayout = findViewById(R.id.linearLayout);
-        customSurfaceView = new CustomSurfaceView(getApplicationContext());
-        linearLayout.addView(customSurfaceView);
+
+        /*customSurfaceView = new CustomSurfaceView(getApplicationContext());//onstart???
+        linearLayout.addView(customSurfaceView);//onstart???
         customSurfaceView.setLayoutParams(//onstart???
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT
+                )
+        );*/
+
+        //surface view will be self destroyed
+        /*setResult(RESULT_OK);
+        finish();*/
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        hideSystemUI();
+        customSurfaceView = new CustomSurfaceView(
+                getApplicationContext(),
+                ()->{
+                    //setResult(RESULT_OK);
+                    finish();
+                }
+        );
+        linearLayout.addView(customSurfaceView);
+        customSurfaceView.setLayoutParams(
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.MATCH_PARENT

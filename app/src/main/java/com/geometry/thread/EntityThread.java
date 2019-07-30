@@ -1,5 +1,7 @@
 package com.geometry.thread;
 
+import android.os.Handler;
+
 import com.geometry.Global;
 import com.geometry.entity.Enemy;
 
@@ -9,25 +11,22 @@ import java.util.List;
 public class EntityThread extends Thread {
 
     private boolean running;
-    private AnimationThread animationThread = new AnimationThread();
+    Handler handler;
 
     @Override
     public void run() {
         running = true;
 
-        animationThread.start();
-        while (animationThread.mHandler == null) ;// FIXME: 29.07.2019 переделать по нормальному
-
         Global.enemiesLock.writeLock().lock();
         try {
-            for (int i = 0; i < Global.ENEMY_COUNT; ++i) {
+            for (int i = 0; i < Global.entityGenerator.ENEMY_COUNT; ++i) {
                 Enemy enemy = Global.entityGenerator.generateEnemy(
                         Global.width,
                         Global.height,
                         Global.entityGenerator.PLAYER_BASE_SQUARE
                 );
                 Global.enemies.add(enemy);
-                animationThread.mHandler.post(enemy.animator::start);
+                handler.post(enemy.animator::start);
             }
         } finally {
             Global.enemiesLock.writeLock().unlock();
@@ -60,7 +59,7 @@ public class EntityThread extends Thread {
 
                     Global.player.lock.lock();
                     try {
-                        square = Global.player.figure.square;
+                        square = Global.player.figure.getSquare();
                     } finally {
                         Global.player.lock.unlock();
                     }
@@ -71,7 +70,7 @@ public class EntityThread extends Thread {
                             square
                     );
                     forAdd.add(enemy);
-                    animationThread.mHandler.post(enemy.animator::start);
+                    handler.post(enemy.animator::start);
                 }
 
                 Global.enemiesLock.writeLock().lock();
@@ -87,6 +86,5 @@ public class EntityThread extends Thread {
 
     public void cancel() {
         running = false;
-        animationThread.cancel();
     }
 }

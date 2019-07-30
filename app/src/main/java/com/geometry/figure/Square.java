@@ -6,11 +6,22 @@ import android.graphics.PointF;
 
 public class Square extends Figure {
 
-    private float halfSide;
+    float halfSide;
+
+    @Override
+    protected void updateComponents() {
+        halfSide = (float) (Math.sqrt(square) / 2);
+    }
 
     public Square(PointF cpoint, float square, Paint paint) {
         super(cpoint, square, paint);
-        halfSide = (float) (Math.sqrt(square) / 2);
+        updateComponents();
+    }
+
+    @Override
+    public void setSquare(float square) {
+        super.setSquare(square);
+        updateComponents();
     }
 
     @Override
@@ -22,5 +33,12 @@ public class Square extends Figure {
                 cpoint.y + halfSide,
                 paint
         );
+    }
+
+    @Override
+    public Square clone() {
+        Square clone = (Square) super.clone();
+        clone.halfSide = halfSide;
+        return clone;
     }
 }

@@ -3,27 +3,33 @@ package com.geometry;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+import com.geometry.entity.EntityGenerator;
+import com.geometry.thread.AnimationThread;
 import com.geometry.thread.DrawThread;
-import com.geometry.thread.EntityThread;
+
+import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 // TODO: 26.07.2019 как правильно делать lockCanvas???
-// TODO: 23.07.2019 check borders
 // TODO: 26.07.2019 check float cast priority
 // TODO: 23.07.2019 калибровка скорости движения
 public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Callback,
         View.OnTouchListener {
 
+    private static final String LOG_TAG = CustomSurfaceView.class.getSimpleName();
+
     private SurfaceHolder surfaceHolder;
 
     private DrawThread drawThread;
-    private EntityThread entityThread;
+    private AnimationThread animationThread;
 
-    public CustomSurfaceView(Context context) {
+    public CustomSurfaceView(Context context, Runnable onGameOver) {
         super(context);
 //        setFocusable(true);//возможно без этого не будут открываться панели при смене ориентации
 
@@ -33,10 +39,16 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         }
 
         setOnTouchListener(this);
+        animationThread = new AnimationThread(onGameOver);
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        // TODO: 30.07.2019 убрать зависимость класса и убрать вообще подобные места
+        Global.entityGenerator = new EntityGenerator();
+        Global.enemiesLock = new ReentrantReadWriteLock();
+        Global.enemies = new ArrayList<>();
+
         boolean retry = true;
         while (retry) {
             Canvas canvas = surfaceHolder.lockCanvas();
@@ -54,10 +66,11 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                 }
         }
 
+        Log.i(LOG_TAG, "width=" + Global.width + " height=" + Global.height);
+
         drawThread = new DrawThread(getHolder());//fixme surfaceHolder???
         drawThread.start();
-        entityThread = new EntityThread();
-        entityThread.start();
+        animationThread.start();
     }
 
     @Override
@@ -66,8 +79,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        entityThread.cancel();
         drawThread.cancel();
+        animationThread.cancel();//join?
 
         boolean retry = true;
         while (retry)
@@ -77,6 +90,9 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
+        Log.i(LOG_TAG, "threads are cancelled, surface destroyed");//debug
+        /**TODO: 29.07.2019 some {@link Global} cleaning*/
     }
 
     private float x, y;

@@ -24,9 +24,10 @@ public class EntityGenerator {
     private final float SQUARE_COEF_MAX = 25f;
     private final int RGB_MIN = 80;
     private final int RGB_MAX = 220;
-    private final long DURATION_MIN = 2000;
+    private final long DURATION_MIN = 3500;
     private final long DURATION_MAX = 7000;
     public final float PLAYER_BASE_SQUARE = 400;
+    public final int ENEMY_COUNT = 20;
 
     private Random random = new Random();
 
@@ -83,12 +84,12 @@ public class EntityGenerator {
         );
         enemy.animator.addListener(
                 new AnimatorListenerAdapter() {
-                    @Override
+                    /*@Override
                     public void onAnimationCancel(Animator animation) {//redundant???
                         super.onAnimationCancel(animation);
                         if (enemy.lock.isHeldByCurrentThread())
                             enemy.lock.unlock();
-                    }
+                    }*/
 
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -112,7 +113,6 @@ public class EntityGenerator {
         return new Player(generateFigure(cpoint, PLAYER_BASE_SQUARE, paint));
     }
 
-    // FIXME: 26.07.2019 как передавать width/height???
     public Enemy generateEnemy(float width, float height, float square) {
         List<PointF> pointFS = new ArrayList<>();
         pointFS.add(new PointF(0, random.nextFloat() * height));

@@ -45,7 +45,8 @@ public class DrawThread extends Thread {
                                 enemy -> {
                                     enemy.lock.lock();
                                     try {
-                                        enemy.figure.draw(canvas);
+                                        if (enemy.alive)
+                                            enemy.figure.draw(canvas);
                                     } finally {
                                         enemy.lock.unlock();
                                     }

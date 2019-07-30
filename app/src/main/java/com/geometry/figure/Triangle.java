@@ -7,12 +7,23 @@ import android.graphics.PointF;
 
 public class Triangle extends Figure {
 
-    private float side, h;
+    float side, h;
+
+    @Override
+    protected void updateComponents() {
+        side = (float) Math.sqrt(4 * square / Math.sqrt(3));
+        h = (float) (Math.sqrt(3) / 2 * side);
+    }
 
     public Triangle(PointF cpoint, float square, Paint paint) {
         super(cpoint, square, paint);
-        side = (float) Math.sqrt(4 * square / Math.sqrt(3));
-        h = (float) (Math.sqrt(3) / 2 * side);
+        updateComponents();
+    }
+
+    @Override
+    public void setSquare(float square) {
+        super.setSquare(square);
+        updateComponents();
     }
 
     @Override
@@ -25,5 +36,13 @@ public class Triangle extends Figure {
         path.close();
 
         canvas.drawPath(path, paint);
+    }
+
+    @Override
+    public Triangle clone() {
+        Triangle clone = (Triangle) super.clone();
+        clone.side = side;
+        clone.h = h;
+        return clone;
     }
 }
