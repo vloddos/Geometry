@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        hideSystemUI();
+        //hideSystemUI();
         customSurfaceView = new CustomSurfaceView(
                 getApplicationContext(),
                 ()->{
@@ -58,10 +58,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (hasFocus)
+        /*if (hasFocus)
             hideSystemUI();//todo check without
         else
-            showSystemUI();
+            showSystemUI();*/
     }
 
     private void hideSystemUI() {

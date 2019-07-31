@@ -1,6 +1,7 @@
 package com.geometry.figure;
 
 import android.graphics.PointF;
+import android.util.Log;
 
 public class Line {
 
@@ -13,6 +14,9 @@ public class Line {
     }
 
     public boolean isContain(PointF p) {
-        return Math.abs(A * p.x + B * p.y + C) <= 1e-4;
+        /*float tmp = Math.abs(A * p.x + B * p.y + C);
+        Log.i("Line", A + " " + B + " " + C + " " + p.x + " " + p.y + " tmp=" + tmp);
+        return tmp <= 1e-3;*/
+        return Math.abs(A * p.x + B * p.y + C) <= 1e-3;
     }
 }

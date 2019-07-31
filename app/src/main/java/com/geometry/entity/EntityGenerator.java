@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class EntityGenerator {
 
     private final float SQUARE_COEF_MIN = 0.01f;
-    private final float SQUARE_COEF_MAX = 25f;
+    private final float SQUARE_COEF_MAX = 4f;
     private final int RGB_MIN = 80;
     private final int RGB_MAX = 220;
     private final long DURATION_MIN = 3500;
@@ -32,6 +32,7 @@ public class EntityGenerator {
     private Random random = new Random();
 
     public Figure generateFigure(PointF cpoint, float square, Paint paint) {
+        //return new Circle(cpoint, square, paint);
         switch (random.nextInt(3)) {
             case 0:
                 return new Circle(cpoint, square, paint);
@@ -74,32 +75,25 @@ public class EntityGenerator {
         enemy.animator.addUpdateListener(
                 animation -> {
                     enemy.lock.lock();
-                    try {
-                        enemy.figure.cpoint.x = (float) animation.getAnimatedValue("cx");
-                        enemy.figure.cpoint.y = (float) animation.getAnimatedValue("cy");
-                    } finally {
-                        enemy.lock.unlock();
-                    }
+                    //try {
+                    enemy.figure.cpoint.x = (float) animation.getAnimatedValue("cx");
+                    enemy.figure.cpoint.y = (float) animation.getAnimatedValue("cy");
+                    //} finally {
+                    enemy.lock.unlock();
+                    //}
                 }
         );
         enemy.animator.addListener(
                 new AnimatorListenerAdapter() {
-                    /*@Override
-                    public void onAnimationCancel(Animator animation) {//redundant???
-                        super.onAnimationCancel(animation);
-                        if (enemy.lock.isHeldByCurrentThread())
-                            enemy.lock.unlock();
-                    }*/
-
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         enemy.lock.lock();
-                        try {
-                            enemy.alive = false;
-                        } finally {
-                            enemy.lock.unlock();
-                        }
+                        //try {
+                        enemy.alive = false;
+                        //} finally {
+                        enemy.lock.unlock();
+                        //}
                     }
                 }
         );
@@ -111,6 +105,7 @@ public class EntityGenerator {
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         return new Player(generateFigure(cpoint, PLAYER_BASE_SQUARE, paint));
+        //return new Player(new Triangle(cpoint, PLAYER_BASE_SQUARE, paint));
     }
 
     public Enemy generateEnemy(float width, float height, float square) {
@@ -124,7 +119,16 @@ public class EntityGenerator {
                 start = pointFS.remove(random.nextInt(4)),
                 end = pointFS.remove(random.nextInt(3));
 
+        /*PointF
+                start = pointFS.get(3),
+                end = pointFS.get(2);*/
+
         Figure figure = generateFigure(start, generateSquare(square), generatePaint());
+        /*Figure figure = generateFigure(
+                new PointF(random.nextFloat() * width, random.nextFloat() * height),
+                generateSquare(square),
+                generatePaint()
+        );*/
         ReentrantLock lock = new ReentrantLock();
 
         Enemy enemy = new Enemy(start, end, figure, lock);

@@ -44,7 +44,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        // TODO: 30.07.2019 убрать зависимость класса и убрать вообще подобные места
+        // TODO: 30.07.2019 убрать зависимость от Global и убрать вообще подобные места
         Global.entityGenerator = new EntityGenerator();
         Global.enemiesLock = new ReentrantReadWriteLock();
         Global.enemies = new ArrayList<>();
@@ -52,18 +52,19 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         boolean retry = true;
         while (retry) {
             Canvas canvas = surfaceHolder.lockCanvas();
-            if (canvas != null)
-                try {
-                    Global.player = Global.entityGenerator.generatePlayer(
-                            new PointF(
-                                    (float) ((Global.width = canvas.getWidth()) / 2),
-                                    (float) ((Global.height = canvas.getHeight()) / 2)
-                            )
-                    );
-                    retry = false;
-                } finally {
-                    surfaceHolder.unlockCanvasAndPost(canvas);
-                }
+            if (canvas != null) {
+                //try {
+                Global.player = Global.entityGenerator.generatePlayer(
+                        new PointF(
+                                (float) ((Global.width = canvas.getWidth()) / 2),
+                                (float) ((Global.height = canvas.getHeight()) / 2)
+                        )
+                );
+                retry = false;
+                //} finally {
+                surfaceHolder.unlockCanvasAndPost(canvas);
+                //}
+            }
         }
 
         Log.i(LOG_TAG, "width=" + Global.width + " height=" + Global.height);
@@ -103,12 +104,12 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             switch (event.getAction()) {//todo check
                 default:
                     Global.player.lock.lock();
-                    try {
-                        Global.player.figure.cpoint.x += event.getX() - x;
-                        Global.player.figure.cpoint.y += event.getY() - y;
-                    } finally {
-                        Global.player.lock.unlock();
-                    }
+                    //try {
+                    Global.player.figure.cpoint.x += event.getX() - x;
+                    Global.player.figure.cpoint.y += event.getY() - y;
+                    //} finally {
+                    Global.player.lock.unlock();
+                    //}
                 case MotionEvent.ACTION_DOWN:
                     x = event.getX();
                     y = event.getY();
@@ -119,126 +120,3 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
             return false;
     }
 }
-
-/*
-String PROPERTY_CX = "cx";
-    String PROPERTY_CY = "cy";
-    Lock clock = new ReentrantLock();
-    float cx, cy, r = 20;
-    Paint w, b;
-
-    {
-        w = new Paint();
-        w.setColor(Color.WHITE);
-        w.setStyle(Paint.Style.FILL_AND_STROKE);
-
-        b = new Paint();
-        b.setColor(Color.BLACK);
-        b.setStyle(Paint.Style.FILL_AND_STROKE);
-    }
- */
-/*
-ValueAnimator animator = new ValueAnimator();
-        animator.setValues(
-                PropertyValuesHolder.ofFloat(PROPERTY_CX, 350, 400, 600),
-                PropertyValuesHolder.ofFloat(PROPERTY_CY, 330, 560, 560)
-        );
-        animator.setDuration(2000);
-        animator.addUpdateListener(
-                animation -> {
-                    clock.lock();
-                    try {
-                        cx = (float) animation.getAnimatedValue(PROPERTY_CX);
-                        cy = (float) animation.getAnimatedValue(PROPERTY_CY);
-                    } finally {
-                        clock.unlock();
-                    }
-                }
-        );
-        animator.start();
-        new Thread(
-                () -> {
-                    while (true) {
-                        Canvas canvas = surfaceHolder.lockCanvas();
-                        if (canvas != null) {
-                            clock.lock();
-                            try {
-                                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), b);
-                                canvas.drawCircle(cx, cy, r, w);
-                            } finally {
-                                clock.unlock();
-                                surfaceHolder.unlockCanvasAndPost(canvas);
-                            }
-                        }
-                    }
-                }
-        ).start();
- */
-/*Canvas canvas = surfaceHolder.lockCanvas();
-        canvas.drawColor(Color.WHITE);
-        Paint tp = new Paint();
-        //tp.setStrokeWidth();???
-        tp.setColor(Color.RED);
-        tp.setStyle(Paint.Style.FILL_AND_STROKE);
-
-        Path path = new Path();
-        path.setFillType(Path.FillType.EVEN_ODD);
-        path.moveTo(100, 100);
-        path.lineTo(140, 140);
-        path.lineTo(230, 250);
-        path.close();
-
-        canvas.drawPath(path, tp);
-
-        float x = (float) canvas.getWidth() / 2;
-        float y = (float) canvas.getHeight() / 2;
-        surfaceHolder.unlockCanvasAndPost(canvas);*/
-//drawPlayer(x, y, 10);
-
-/*
-Thread draw = new Thread(
-                () -> {
-                    while (true) {
-                        Canvas canvas = surfaceHolder.lockCanvas();
-
-                        //draw black rect
-                        Paint b = new Paint();
-                        b.setColor(Color.BLACK);
-                        b.setStyle(Paint.Style.FILL_AND_STROKE);
-                        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), b);
-
-                        //draw player
-                        Paint w = new Paint();
-                        w.setColor(Color.WHITE);
-                        w.setStyle(Paint.Style.FILL_AND_STROKE);
-                        canvas.drawCircle(
-                                Player.getInstance().x,
-                                Player.getInstance().y,
-                                Player.getInstance().radius,
-                                w
-                        );
-
-                        //draw enemies
-                        surfaceHolder.unlockCanvasAndPost(canvas);
-                    }
-                }
-        );
-
-        Thread animation = new Thread(
-                () -> {
-                    //изменить координаты врагов и удалить если их не видно
-                }
-        );
-
-        Thread entityGenerator = new Thread(
-                () -> {
-                    //если есть место сгенерировать врага и добавить в лист
-                }
-        );
-
-        Thread intersection = new Thread(
-                () -> {
-
-                }
-        );
- */

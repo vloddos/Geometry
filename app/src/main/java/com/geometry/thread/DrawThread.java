@@ -20,44 +20,45 @@ public class DrawThread extends Thread {
         running = true;
         while (running) {
             Canvas canvas = surfaceHolder.lockCanvas();
-            if (canvas != null)
-                try {
-                    canvas.drawColor(Color.BLACK);
+            if (canvas != null) {
+                //try {
+                canvas.drawColor(Color.BLACK);
 
-                    Global.player.lock.lock();
-                    try {
-                        if (Global.player.figure.cpoint.x < 0)
-                            Global.player.figure.cpoint.x = 0;
-                        if (Global.player.figure.cpoint.y < 0)
-                            Global.player.figure.cpoint.y = 0;
-                        if (Global.player.figure.cpoint.x > Global.width)
-                            Global.player.figure.cpoint.x = Global.width;
-                        if (Global.player.figure.cpoint.y > Global.height)
-                            Global.player.figure.cpoint.y = Global.height;
-                        Global.player.figure.draw(canvas);
-                    } finally {
-                        Global.player.lock.unlock();
-                    }
+                Global.player.lock.lock();
+                //try {
+                if (Global.player.figure.cpoint.x < 0)
+                    Global.player.figure.cpoint.x = 0;
+                if (Global.player.figure.cpoint.y < 0)
+                    Global.player.figure.cpoint.y = 0;
+                if (Global.player.figure.cpoint.x > Global.width)
+                    Global.player.figure.cpoint.x = Global.width;
+                if (Global.player.figure.cpoint.y > Global.height)
+                    Global.player.figure.cpoint.y = Global.height;
+                Global.player.figure.draw(canvas);
+                //} finally {
+                Global.player.lock.unlock();
+                //}
 
-                    Global.enemiesLock.readLock().lock();
-                    try {
-                        Global.enemies.forEach(
-                                enemy -> {
-                                    enemy.lock.lock();
-                                    try {
-                                        if (enemy.alive)
-                                            enemy.figure.draw(canvas);
-                                    } finally {
-                                        enemy.lock.unlock();
-                                    }
-                                }
-                        );
-                    } finally {
-                        Global.enemiesLock.readLock().unlock();
-                    }
-                } finally {
-                    surfaceHolder.unlockCanvasAndPost(canvas);
-                }
+                Global.enemiesLock.readLock().lock();
+                //try {
+                Global.enemies.forEach(
+                        enemy -> {
+                            enemy.lock.lock();
+                            //try {
+                            if (enemy.alive)
+                                enemy.figure.draw(canvas);
+                            //} finally {
+                            enemy.lock.unlock();
+                            //}
+                        }
+                );
+                //} finally {
+                Global.enemiesLock.readLock().unlock();
+                //}
+                //} finally{
+                surfaceHolder.unlockCanvasAndPost(canvas);
+                //}
+            }
         }
     }
 

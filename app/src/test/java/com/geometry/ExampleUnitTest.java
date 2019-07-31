@@ -29,4 +29,9 @@ public class ExampleUnitTest {
                 System.out.println(3);
         }
     }
+
+    @Test
+    public void floatAssignmentToDouble() {
+        System.out.println(2.0 * Float.MAX_VALUE * Float.MAX_VALUE);
+    }
 }

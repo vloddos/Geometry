@@ -1,14 +1,16 @@
 package com.geometry.figure;
 
 import android.graphics.PointF;
+import android.util.Log;
 
 // TODO: 30.07.2019 меньше операций
 // TODO: 31.07.2019 учитывать касания
+// TODO: 31.07.2019 сделать собственный класс PointD
 public class Intersector {
 
     public boolean areIntersecting(Figure a, Figure b) {
         if (a instanceof Circle && b instanceof Circle)
-            return circleWithCircle((Circle) a, (Circle) b);
+            return circleWithCircle((Circle) a, (Circle) b);//+
         else if (a instanceof Circle && b instanceof Square)
             return circleWithSquare((Circle) a, (Square) b);
         else if (a instanceof Square && b instanceof Circle)
@@ -35,30 +37,50 @@ public class Intersector {
                 x = -a.C * b.B + b.C * a.B,
                 y = -a.A * b.C + b.A * a.C;
 
-        if (Math.abs(d) > 1e-4) {
+        if (Math.abs(d) > 0) {
             PointF p = new PointF(x / d, y / d);
+            //Log.i("Intersector", p.toString());
             return a.isContain(p) && b.isContain(p);
         } else
             return false;
     }
 
     // TODO: 31.07.2019 check
+    // TODO: 31.07.2019 multiplication instead of cast???
+    //усложнять модель дороже чем создать еще 1 объект (но это не точно)
     public boolean circleWithSegment(Circle circle, Segment segment) {
-        float
-                r2 = circle.radius * circle.radius,
-                a = segment.A * segment.A + segment.B * segment.B,
-                b = 2 * segment.A * segment.C,
-                c = segment.C * segment.C - segment.B * segment.B * r2,
+        segment = new Segment(
+                new PointF(segment.a.x - circle.cpoint.x, segment.a.y - circle.cpoint.y),
+                new PointF(segment.b.x - circle.cpoint.x, segment.b.y - circle.cpoint.y)
+        );
+
+        double
+                r2 = (double) circle.radius * circle.radius,
+                a = (double) segment.A * segment.A + (double) segment.B * segment.B,
+                b = 2. * segment.A * segment.C,
+                c = (double) segment.C * segment.C - r2 * segment.B * segment.B,
                 d = b * b - 4 * a * c;
 
-        if (d > 1e-4) {
+        //Log.i("circleWithSegment", a + " " + b + " " + c + " " + d);
+
+        if (d >= 0) {
             float
                     x1 = (float) ((-b + Math.sqrt(d)) / (2 * a)),
                     x2 = (float) ((-b - Math.sqrt(d)) / (2 * a)),
-                    y1 = -(segment.A * x1 + segment.C) / segment.B,
-                    y2 = -(segment.A * x2 + segment.C) / segment.B;
+                    y1 = (float) Math.sqrt(r2 - x1 * x1),
+                    y2 = -y1,
+                    y3 = (float) Math.sqrt(r2 - x2 * x2),
+                    y4 = -y3;
 
-            return segment.isContain(new PointF(x1, y1)) || segment.isContain(new PointF(x2, y2));
+            PointF[] pointFS = {
+                    new PointF(x1, y1), new PointF(x1, y2), new PointF(x2, y3), new PointF(x2, y4)
+            };
+
+            for (PointF point : pointFS) {
+                //Log.i("points", point.toString());
+                if (segment.isContain(point))
+                    return true;
+            }
         }
 
         return false;
@@ -123,37 +145,45 @@ public class Intersector {
         Segment[] segments1 = new Segment[]{
                 new Segment(//top
                         new PointF(a.cpoint.x - a.halfSide, a.cpoint.y - a.halfSide),
-                        new PointF(a.cpoint.x + a.halfSide, a.cpoint.y - a.halfSide)
+                        new PointF(a.cpoint.x + a.halfSide, a.cpoint.y - a.halfSide)/*,
+                        "s1 top"*/
                 ),
                 new Segment(//right
                         new PointF(a.cpoint.x + a.halfSide, a.cpoint.y - a.halfSide),
-                        new PointF(a.cpoint.x + a.halfSide, a.cpoint.y + a.halfSide)
+                        new PointF(a.cpoint.x + a.halfSide, a.cpoint.y + a.halfSide)/*,
+                        "s1 right"*/
                 ),
                 new Segment(//bottom
                         new PointF(a.cpoint.x - a.halfSide, a.cpoint.y + a.halfSide),
-                        new PointF(a.cpoint.x + a.halfSide, a.cpoint.y + a.halfSide)
+                        new PointF(a.cpoint.x + a.halfSide, a.cpoint.y + a.halfSide)/*,
+                        "s1 bottom"*/
                 ),
                 new Segment(//left
                         new PointF(a.cpoint.x - a.halfSide, a.cpoint.y - a.halfSide),
-                        new PointF(a.cpoint.x - a.halfSide, a.cpoint.y + a.halfSide)
+                        new PointF(a.cpoint.x - a.halfSide, a.cpoint.y + a.halfSide)/*,
+                        "s1 left"*/
                 )
         };
         Segment[] segments2 = new Segment[]{
                 new Segment(//top
                         new PointF(b.cpoint.x - b.halfSide, b.cpoint.y - b.halfSide),
-                        new PointF(b.cpoint.x + b.halfSide, b.cpoint.y - b.halfSide)
+                        new PointF(b.cpoint.x + b.halfSide, b.cpoint.y - b.halfSide)/*,
+                        "s2 top"*/
                 ),
                 new Segment(//right
                         new PointF(b.cpoint.x + b.halfSide, b.cpoint.y - b.halfSide),
-                        new PointF(b.cpoint.x + b.halfSide, b.cpoint.y + b.halfSide)
+                        new PointF(b.cpoint.x + b.halfSide, b.cpoint.y + b.halfSide)/*,
+                        "s2 right"*/
                 ),
                 new Segment(//bottom
                         new PointF(b.cpoint.x - b.halfSide, b.cpoint.y + b.halfSide),
-                        new PointF(b.cpoint.x + b.halfSide, b.cpoint.y + b.halfSide)
+                        new PointF(b.cpoint.x + b.halfSide, b.cpoint.y + b.halfSide)/*,
+                        "s2 bottom"*/
                 ),
                 new Segment(//left
                         new PointF(b.cpoint.x - b.halfSide, b.cpoint.y - b.halfSide),
-                        new PointF(b.cpoint.x - b.halfSide, b.cpoint.y + b.halfSide)
+                        new PointF(b.cpoint.x - b.halfSide, b.cpoint.y + b.halfSide)/*,
+                        "s2 left"*/
                 )
         };
 
@@ -161,6 +191,23 @@ public class Intersector {
             for (Segment s2 : segments2)
                 if (segmentWithSegment(s1, s2))
                     return true;
+
+        /*for (Segment s1 : segments1)
+            for (Segment s2 : segments2) {
+                Log.i("Segments", s1.toString() + ";;;" + s2.toString());
+
+                float
+                        d = s1.A * s2.B - s2.A * s1.B,
+                        x = -s1.C * s2.B + s2.C * s1.B,
+                        y = -s1.A * s2.C + s2.A * s1.C;
+
+                if (Math.abs(d) > 0) {
+                    PointF p = new PointF(x / d, y / d);
+                    Log.i("Intersector", p.toString());
+                    if (s1.isContain(p) && s2.isContain(p))
+                        return true;
+                }
+            }*/
 
         return false;
     }
