@@ -2,6 +2,7 @@ package com.geometry.thread;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.SurfaceHolder;
 
 import com.geometry.Global;
@@ -54,10 +55,19 @@ public class DrawThread extends Thread {
                 );
                 //} finally {
                 Global.enemiesLock.readLock().unlock();
-                //}
-                //} finally{
+
+                Global.bonusesLock.readLock().lock();
+                Global.bonuses.forEach(
+                        bonus -> {
+                            bonus.lock.lock();
+                            if (bonus.alive)
+                                bonus.numerableFigure.draw(canvas);
+                            bonus.lock.unlock();
+                        }
+                );
+                Global.bonusesLock.readLock().unlock();
+
                 surfaceHolder.unlockCanvasAndPost(canvas);
-                //}
             }
         }
     }

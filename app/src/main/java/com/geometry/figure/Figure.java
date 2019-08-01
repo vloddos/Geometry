@@ -6,7 +6,7 @@ import android.graphics.PointF;
 
 public abstract class Figure implements Cloneable {
 
-    protected Paint paint;
+    public Paint paint;
     public PointF cpoint;
     protected float square;
 

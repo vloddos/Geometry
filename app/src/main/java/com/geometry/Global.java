@@ -1,5 +1,6 @@
 package com.geometry;
 
+import com.geometry.entity.Bonus;
 import com.geometry.entity.Enemy;
 import com.geometry.entity.EntityGenerator;
 import com.geometry.entity.Player;
@@ -11,10 +12,14 @@ public class Global {
 
     public static int width;
     public static int height;
+    public static int fieldSquare;
 
     public static Player player;
     public static EntityGenerator entityGenerator;
 
     public static ReadWriteLock enemiesLock;
     public static List<Enemy> enemies;// TODO: 30.07.2019 make array instead
+
+    public static ReadWriteLock bonusesLock;
+    public static List<Bonus> bonuses;
 }

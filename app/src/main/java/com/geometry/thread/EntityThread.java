@@ -1,8 +1,10 @@
 package com.geometry.thread;
 
 import android.os.Handler;
+import android.util.Log;
 
 import com.geometry.Global;
+import com.geometry.entity.Bonus;
 import com.geometry.entity.Enemy;
 
 import java.util.ArrayList;
@@ -33,8 +35,11 @@ public class EntityThread extends Thread {
         //}
 
         while (running) {
-            List<Enemy> forRemove = new ArrayList<>();
-            List<Enemy> forAdd = new ArrayList<>();
+            //enemies
+            //=============================================
+            float square;
+            List<Enemy> enemiesForRemove = new ArrayList<>();
+            List<Enemy> enemiesForAdd = new ArrayList<>();
 
             Global.enemiesLock.readLock().lock();
             //try {
@@ -43,7 +48,7 @@ public class EntityThread extends Thread {
                         enemy.lock.lock();
                         //try {
                         if (!enemy.alive)
-                            forRemove.add(enemy);
+                            enemiesForRemove.add(enemy);
                         //} finally {
                         enemy.lock.unlock();
                         //}
@@ -53,10 +58,8 @@ public class EntityThread extends Thread {
             Global.enemiesLock.readLock().unlock();
             //}
 
-            if (forRemove.size() > 0) {
-                while (forAdd.size() < forRemove.size()) {
-                    float square;
-
+            if (enemiesForRemove.size() > 0) {
+                while (enemiesForAdd.size() < enemiesForRemove.size()) {
                     Global.player.lock.lock();
                     //try {
                     square = Global.player.figure.getSquare();
@@ -69,18 +72,61 @@ public class EntityThread extends Thread {
                             Global.height,
                             square
                     );
-                    forAdd.add(enemy);
+                    enemiesForAdd.add(enemy);
                     handler.post(enemy.animator::start);
                 }
 
                 Global.enemiesLock.writeLock().lock();
                 //try {
-                Global.enemies.removeAll(forRemove);
-                Global.enemies.addAll(forAdd);
+                Global.enemies.removeAll(enemiesForRemove);
+                Global.enemies.addAll(enemiesForAdd);
                 //} finally {
                 Global.enemiesLock.writeLock().unlock();
                 //}
             }
+
+            //bonuses
+            //=============================================
+            List<Bonus> bonusesForRemove = new ArrayList<>();
+            List<Bonus> bonusesForAdd = new ArrayList<>();
+
+            Global.bonusesLock.readLock().lock();
+            Global.bonuses.forEach(
+                    bonus -> {
+                        bonus.lock.lock();
+                        if (!bonus.alive)
+                            bonusesForRemove.add(bonus);
+                        bonus.lock.unlock();
+                    }
+            );
+            Global.bonusesLock.readLock().unlock();
+
+
+            Global.player.lock.lock();
+            square = Global.player.figure.getSquare();
+            Global.player.lock.unlock();
+            if (square / Global.fieldSquare > Global.entityGenerator.SCREEN_PERCENTAGE_MAX)
+                while (
+                        Global.bonuses.size() - bonusesForRemove.size() + bonusesForAdd.size()
+                                < Global.entityGenerator.BONUS_COUNT
+                ) {
+                    Global.player.lock.lock();
+                    square = Global.player.figure.getSquare();
+                    Global.player.lock.unlock();
+
+                    Bonus bonus = Global.entityGenerator.generateBonus(
+                            Global.width,
+                            Global.height,
+                            square
+                    );
+                    bonusesForAdd.add(bonus);
+                    handler.post(bonus.animator::start);
+                }
+
+            Global.bonusesLock.writeLock().lock();
+            Global.bonuses.removeAll(bonusesForRemove);
+            Global.bonuses.addAll(bonusesForAdd);
+            Global.bonusesLock.writeLock().unlock();
         }
     }
 

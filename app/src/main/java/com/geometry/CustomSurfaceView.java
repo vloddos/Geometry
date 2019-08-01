@@ -48,6 +48,8 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         Global.entityGenerator = new EntityGenerator();
         Global.enemiesLock = new ReentrantReadWriteLock();
         Global.enemies = new ArrayList<>();
+        Global.bonusesLock = new ReentrantReadWriteLock();
+        Global.bonuses = new ArrayList<>();
 
         boolean retry = true;
         while (retry) {
@@ -60,6 +62,7 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                                 (float) ((Global.height = canvas.getHeight()) / 2)
                         )
                 );
+                Global.fieldSquare = Global.width * Global.height;
                 retry = false;
                 //} finally {
                 surfaceHolder.unlockCanvasAndPost(canvas);

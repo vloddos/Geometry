@@ -6,11 +6,12 @@ import android.util.Log;
 // TODO: 30.07.2019 меньше операций
 // TODO: 31.07.2019 учитывать касания
 // TODO: 31.07.2019 сделать собственный класс PointD
+// TODO: 02.08.2019 use jni
 public class Intersector {
 
     public boolean areIntersecting(Figure a, Figure b) {
         if (a instanceof Circle && b instanceof Circle)
-            return circleWithCircle((Circle) a, (Circle) b);//+
+            return circleWithCircle((Circle) a, (Circle) b);
         else if (a instanceof Circle && b instanceof Square)
             return circleWithSquare((Circle) a, (Square) b);
         else if (a instanceof Square && b instanceof Circle)
@@ -49,7 +50,7 @@ public class Intersector {
     // TODO: 31.07.2019 multiplication instead of cast???
     //усложнять модель дороже чем создать еще 1 объект (но это не точно)
     public boolean circleWithSegment(Circle circle, Segment segment) {
-        segment = new Segment(
+        segment = new Segment(//параллельный перенос отрезка
                 new PointF(segment.a.x - circle.cpoint.x, segment.a.y - circle.cpoint.y),
                 new PointF(segment.b.x - circle.cpoint.x, segment.b.y - circle.cpoint.y)
         );

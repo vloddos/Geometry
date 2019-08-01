@@ -1,9 +1,9 @@
 package com.geometry.thread;
 
 import android.os.Handler;
-import android.util.Log;
 
 import com.geometry.Global;
+import com.geometry.entity.Bonus;
 import com.geometry.entity.Enemy;
 import com.geometry.figure.Figure;
 import com.geometry.figure.Intersector;
@@ -22,10 +22,15 @@ public class IntersectionThread extends Thread {
 
     @Override
     public void run() {
+        //Record record = new Record();// TODO: 01.08.2019 count in new thread???
         Intersector intersector = new Intersector();
 
         running = true;
         while (running) {
+            float square;
+
+            //enemies
+            //=============================================
             Global.enemiesLock.readLock().lock();
             //try {
             //Log.i(LOG_TAG, "new loop of the checking intersection");//debug
@@ -44,11 +49,12 @@ public class IntersectionThread extends Thread {
                             )
                     ) {
                         //Log.i(LOG_TAG, "intersection " + enemy.figure.cpoint.toString());//debug
-                        float square = Global.player.figure.getSquare();
+                        square = Global.player.figure.getSquare();
                         if (square > enemy.figure.getSquare()) {
                             enemy.alive = false;
-                            Figure figure = enemy.figure.clone();//тут также меняется цвет, мб убрать???
-                            figure.setSquare((float) (square + 3 * Math.sqrt(square)));
+                            Figure figure = enemy.figure.clone();
+                            figure.paint = Global.player.figure.paint;//цвет остается белым
+                            figure.setSquare((float) (square + 20 * Math.sqrt(square)));
                             Global.player.figure = figure;
                             handler.post(enemy.animator::end);
                         } else {
@@ -70,6 +76,42 @@ public class IntersectionThread extends Thread {
             //} finally {
             Global.enemiesLock.readLock().unlock();
             //}
+
+            //bonuses
+            //=============================================
+            Global.player.lock.lock();
+            square = Global.player.figure.getSquare();
+            Global.player.lock.unlock();
+
+            if (square / Global.fieldSquare > Global.entityGenerator.SCREEN_PERCENTAGE_MAX) {
+                Global.bonusesLock.readLock().lock();
+                for (Bonus bonus : Global.bonuses) {
+                    bonus.lock.lock();
+                    if (bonus.alive) {
+                        Global.player.lock.lock();
+                        if (
+                                intersector.areIntersecting(
+                                        Global.player.figure,
+                                        bonus.numerableFigure.figure
+                                )
+                        ) {
+                            square = Global.player.figure.getSquare() - bonus.numerableFigure.figure.getSquare();
+
+                            if (square >= Global.entityGenerator.PLAYER_BASE_SQUARE) {
+                                bonus.alive = false;
+                                Figure figure = bonus.numerableFigure.figure.clone();
+                                figure.paint = Global.player.figure.paint;//цвет остается белым
+                                figure.setSquare(square);
+                                Global.player.figure = figure;
+                                handler.post(bonus.animator::end);
+                            }
+                        }
+                        Global.player.lock.unlock();
+                    }
+                    bonus.lock.unlock();
+                }
+                Global.bonusesLock.readLock().unlock();
+            }
         }
     }
 
