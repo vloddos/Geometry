@@ -1,8 +1,14 @@
 package com.geometry;
 
-public class Record {
+import androidx.annotation.NonNull;
 
-    public float square;
+import java.io.Serializable;
+
+public class Record implements Serializable {
+
+    private static final long serialVersionUID = 8102953499901562921L;
+
+    public double square;
     public int circles;
     public int squares;
     public int triangles;
@@ -11,11 +17,17 @@ public class Record {
     public Record() {
     }
 
-    public Record(float square, int circles, int squares, int triangles, int total) {
+    public Record(double square, int circles, int squares, int triangles, int total) {
         this.square = square;
         this.circles = circles;
         this.squares = squares;
         this.triangles = triangles;
         this.total = total;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return square + " " + circles + " " + squares + " " + triangles + " " + total;
     }
 }

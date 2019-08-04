@@ -1,28 +1,55 @@
 package com.geometry.thread;
 
+import android.graphics.Canvas;
 import android.os.Handler;
 
 import com.geometry.Global;
+import com.geometry.Record;
 import com.geometry.entity.Bonus;
 import com.geometry.entity.Enemy;
 import com.geometry.figure.Figure;
 import com.geometry.figure.Intersector;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.function.Consumer;
 
 public class IntersectionThread extends Thread {
 
     private static final String LOG_TAG = IntersectionThread.class.getSimpleName();
 
     private boolean running;// FIXME: 30.07.2019 redundant?
-    private Runnable onGameOver;
-    Handler handler;
+    private FutureTask<Handler> handlerFutureTask;
+    private FutureTask<Record> recordFutureTask;
+    private Consumer<Record> onGameOver;
+    private Consumer<Figure> count;
 
-    public IntersectionThread(Runnable onGameOver) {
+    public void setHandlerFutureTask(FutureTask<Handler> handlerFutureTask) {
+        this.handlerFutureTask = handlerFutureTask;
+    }
+
+    public void setRecordFutureTask(FutureTask<Record> recordFutureTask) {
+        this.recordFutureTask = recordFutureTask;
+    }
+
+    public void setOnGameOver(Consumer<Record> onGameOver) {
         this.onGameOver = onGameOver;
+    }
+
+    public void setCount(Consumer<Figure> count) {
+        this.count = count;
     }
 
     @Override
     public void run() {
-        //Record record = new Record();// TODO: 01.08.2019 count in new thread???
+        Handler handler;
+        try {
+            handler = handlerFutureTask.get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return;
+        }
+
         Intersector intersector = new Intersector();
 
         running = true;
@@ -32,26 +59,20 @@ public class IntersectionThread extends Thread {
             //enemies
             //=============================================
             Global.enemiesLock.readLock().lock();
-            //try {
-            //Log.i(LOG_TAG, "new loop of the checking intersection");//debug
             for (Enemy enemy : Global.enemies) {
                 enemy.lock.lock();
-                //try {
                 if (enemy.alive) {
-                    //Log.i(LOG_TAG, "check intersection " + enemy.figure.cpoint.toString());//debug
-
                     Global.player.lock.lock();
-                    //try {
                     if (
                             intersector.areIntersecting(
                                     Global.player.figure,
                                     enemy.figure
                             )
                     ) {
-                        //Log.i(LOG_TAG, "intersection " + enemy.figure.cpoint.toString());//debug
                         square = Global.player.figure.getSquare();
                         if (square > enemy.figure.getSquare()) {
                             enemy.alive = false;
+                            count.accept(enemy.figure);
                             Figure figure = enemy.figure.clone();
                             figure.paint = Global.player.figure.paint;//цвет остается белым
                             figure.setSquare((float) (square + 20 * Math.sqrt(square)));
@@ -61,21 +82,32 @@ public class IntersectionThread extends Thread {
                             Global.player.lock.unlock();
                             enemy.lock.unlock();
                             Global.enemiesLock.readLock().unlock();
-                            onGameOver.run();
+
+                            count.accept(
+                                    new Figure() {
+
+                                        @Override
+                                        protected void updateComponents() {
+                                        }
+
+                                        @Override
+                                        public void draw(Canvas canvas) {
+                                        }
+                                    }
+                            );
+                            try {
+                                onGameOver.accept(recordFutureTask.get());
+                            } catch (ExecutionException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             return;
                         }
                     }
-                    //} finally {
                     Global.player.lock.unlock();
-                    //}
                 }
-                //} finally {
                 enemy.lock.unlock();
-                //}
             }
-            //} finally {
             Global.enemiesLock.readLock().unlock();
-            //}
 
             //bonuses
             //=============================================
@@ -99,6 +131,7 @@ public class IntersectionThread extends Thread {
 
                             if (square >= Global.entityGenerator.PLAYER_BASE_SQUARE) {
                                 bonus.alive = false;
+                                count.accept(bonus.numerableFigure.figure);
                                 Figure figure = bonus.numerableFigure.figure.clone();
                                 figure.paint = Global.player.figure.paint;//цвет остается белым
                                 figure.setSquare(square);

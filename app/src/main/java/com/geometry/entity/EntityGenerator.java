@@ -30,12 +30,11 @@ public class EntityGenerator {
     public final float PLAYER_BASE_SQUARE = 400;
     public final int ENEMY_COUNT = 10;
     public final int BONUS_COUNT = 4;
-    public final float SCREEN_PERCENTAGE_MAX = 0.001f;
+    public final float SCREEN_PERCENTAGE_MAX = 0.01f;
 
     private Random random = new Random();
 
     public Figure generateFigure(PointF cpoint, float square, Paint paint) {
-        //return new Circle(cpoint, square, paint);
         switch (random.nextInt(3)) {
             case 0:
                 return new Circle(cpoint, square, paint);
@@ -85,12 +84,11 @@ public class EntityGenerator {
         enemy.animator.addUpdateListener(
                 animation -> {
                     enemy.lock.lock();
-                    //try {
+
                     enemy.figure.cpoint.x = (float) animation.getAnimatedValue("cx");
                     enemy.figure.cpoint.y = (float) animation.getAnimatedValue("cy");
-                    //} finally {
+
                     enemy.lock.unlock();
-                    //}
                 }
         );
         enemy.animator.addListener(
@@ -99,11 +97,10 @@ public class EntityGenerator {
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         enemy.lock.lock();
-                        //try {
+
                         enemy.alive = false;
-                        //} finally {
+
                         enemy.lock.unlock();
-                        //}
                     }
                 }
         );
@@ -120,12 +117,11 @@ public class EntityGenerator {
         bonus.animator.addUpdateListener(
                 animation -> {
                     bonus.lock.lock();
-                    //try {
+
                     bonus.numerableFigure.figure.cpoint.x = (float) animation.getAnimatedValue("cx");
                     bonus.numerableFigure.figure.cpoint.y = (float) animation.getAnimatedValue("cy");
-                    //} finally {
+
                     bonus.lock.unlock();
-                    //}
                 }
         );
         bonus.animator.addListener(
@@ -134,11 +130,10 @@ public class EntityGenerator {
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         bonus.lock.lock();
-                        //try {
+
                         bonus.alive = false;
-                        //} finally {
+
                         bonus.lock.unlock();
-                        //}
                     }
                 }
         );
@@ -150,7 +145,6 @@ public class EntityGenerator {
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         return new Player(generateFigure(cpoint, PLAYER_BASE_SQUARE, paint));
-        //return new Player(new Triangle(cpoint, PLAYER_BASE_SQUARE, paint));
     }
 
     public Enemy generateEnemy(float width, float height, float square) {
@@ -164,16 +158,7 @@ public class EntityGenerator {
                 start = pointFS.remove(random.nextInt(4)),
                 end = pointFS.remove(random.nextInt(3));
 
-        /*PointF
-                start = pointFS.get(3),
-                end = pointFS.get(2);*/
-
         Figure figure = generateFigure(start, generateSquare(square), generatePaint());
-        /*Figure figure = generateFigure(
-                new PointF(random.nextFloat() * width, random.nextFloat() * height),
-                generateSquare(square),
-                generatePaint()
-        );*/
         ReentrantLock lock = new ReentrantLock();
 
         Enemy enemy = new Enemy(start, end, figure, lock);
@@ -220,5 +205,84 @@ public class EntityGenerator {
         generateAndSetAnimator(bonus);
 
         return bonus;
+    }
+
+    public List<PointF> generateTrajectory(float width, float height) {// TODO: 04.08.2019 более сложная траектория
+        List<PointF> trajectory = new ArrayList<>();
+
+        List<PointF> pointFS = new ArrayList<>();
+        pointFS.add(new PointF(0, random.nextFloat() * height));
+        pointFS.add(new PointF(random.nextFloat() * width, 0));
+        pointFS.add(new PointF(width, random.nextFloat() * height));
+        pointFS.add(new PointF(random.nextFloat() * width, height));
+
+        trajectory.add(pointFS.remove(random.nextInt(4)));
+        trajectory.add(pointFS.remove(random.nextInt(3)));
+
+        return trajectory;
+    }
+
+    public void hideTrajectoryEnds(Figure figure, PointF start, PointF end, float width, float height) {
+        if (figure instanceof Circle) {
+            if (start.x == 0)
+                start.x -= ((Circle) figure).getRadius();
+            if (start.y == 0)
+                start.y -= ((Circle) figure).getRadius();
+
+            if (start.x == width)
+                start.x += ((Circle) figure).getRadius();
+            if (start.y == height)
+                start.y += ((Circle) figure).getRadius();
+
+            if (end.x == 0)
+                end.x -= ((Circle) figure).getRadius();
+            if (end.y == 0)
+                end.y -= ((Circle) figure).getRadius();
+
+            if (end.x == width)
+                end.x += ((Circle) figure).getRadius();
+            if (end.y == height)
+                end.y += ((Circle) figure).getRadius();
+        } else if (figure instanceof Square) {
+            if (start.x == 0)
+                start.x -= ((Square) figure).getHalfSide();
+            if (start.y == 0)
+                start.y -= ((Square) figure).getHalfSide();
+
+            if (start.x == width)
+                start.x += ((Square) figure).getHalfSide();
+            if (start.y == height)
+                start.y += ((Square) figure).getHalfSide();
+
+            if (end.x == 0)
+                end.x -= ((Square) figure).getHalfSide();
+            if (end.y == 0)
+                end.y -= ((Square) figure).getHalfSide();
+
+            if (end.x == width)
+                end.x += ((Square) figure).getHalfSide();
+            if (end.y == height)
+                end.y += ((Square) figure).getHalfSide();
+        } else if (figure instanceof Triangle) {
+            if (start.x == 0)
+                start.x -= ((Triangle) figure).getSide() / 2;
+            if (start.y == 0)
+                start.y -= ((Triangle) figure).getH() / 3;
+
+            if (start.x == width)
+                start.x += ((Triangle) figure).getSide() / 2;
+            if (start.y == height)
+                start.y += 2 * ((Triangle) figure).getH() / 3;
+
+            if (end.x == 0)
+                end.x -= ((Triangle) figure).getSide() / 2;
+            if (end.y == 0)
+                end.y -= ((Triangle) figure).getH() / 3;
+
+            if (end.x == width)
+                end.x += ((Triangle) figure).getSide() / 2;
+            if (end.y == height)
+                end.y += 2 * ((Triangle) figure).getH() / 3;
+        }
     }
 }

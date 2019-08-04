@@ -35,4 +35,8 @@ public class Circle extends Figure {
         clone.radius = radius;
         return clone;
     }
+
+    public float getRadius() {
+        return radius;
+    }
 }

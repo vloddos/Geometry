@@ -12,6 +12,9 @@ public abstract class Figure implements Cloneable {
 
     protected abstract void updateComponents();
 
+    public Figure() {
+    }
+
     public Figure(PointF cpoint, float square, Paint paint) {
         this.cpoint = cpoint;
         this.square = square;

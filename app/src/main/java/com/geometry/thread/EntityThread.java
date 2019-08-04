@@ -1,7 +1,6 @@
 package com.geometry.thread;
 
 import android.os.Handler;
-import android.util.Log;
 
 import com.geometry.Global;
 import com.geometry.entity.Bonus;
@@ -9,18 +8,29 @@ import com.geometry.entity.Enemy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public class EntityThread extends Thread {
 
     private boolean running;
-    Handler handler;
+    private FutureTask<Handler> handlerFutureTask;
+
+    public void setHandlerFutureTask(FutureTask<Handler> handlerFutureTask) {
+        this.handlerFutureTask = handlerFutureTask;
+    }
 
     @Override
     public void run() {
-        running = true;
+        Handler handler;
+        try {
+            handler = handlerFutureTask.get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return;
+        }
 
         Global.enemiesLock.writeLock().lock();
-        //try {
         for (int i = 0; i < Global.entityGenerator.ENEMY_COUNT; ++i) {
             Enemy enemy = Global.entityGenerator.generateEnemy(
                     Global.width,
@@ -30,10 +40,9 @@ public class EntityThread extends Thread {
             Global.enemies.add(enemy);
             handler.post(enemy.animator::start);
         }
-        //} finally {
         Global.enemiesLock.writeLock().unlock();
-        //}
 
+        running = true;
         while (running) {
             //enemies
             //=============================================
@@ -42,30 +51,21 @@ public class EntityThread extends Thread {
             List<Enemy> enemiesForAdd = new ArrayList<>();
 
             Global.enemiesLock.readLock().lock();
-            //try {
             Global.enemies.forEach(
                     enemy -> {
                         enemy.lock.lock();
-                        //try {
                         if (!enemy.alive)
                             enemiesForRemove.add(enemy);
-                        //} finally {
                         enemy.lock.unlock();
-                        //}
                     }
             );
-            //} finally {
             Global.enemiesLock.readLock().unlock();
-            //}
 
             if (enemiesForRemove.size() > 0) {
                 while (enemiesForAdd.size() < enemiesForRemove.size()) {
                     Global.player.lock.lock();
-                    //try {
                     square = Global.player.figure.getSquare();
-                    //} finally {
                     Global.player.lock.unlock();
-                    //}
 
                     Enemy enemy = Global.entityGenerator.generateEnemy(
                             Global.width,
@@ -77,12 +77,9 @@ public class EntityThread extends Thread {
                 }
 
                 Global.enemiesLock.writeLock().lock();
-                //try {
                 Global.enemies.removeAll(enemiesForRemove);
                 Global.enemies.addAll(enemiesForAdd);
-                //} finally {
                 Global.enemiesLock.writeLock().unlock();
-                //}
             }
 
             //bonuses

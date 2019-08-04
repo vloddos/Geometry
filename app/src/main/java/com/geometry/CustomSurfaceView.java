@@ -10,11 +10,16 @@ import android.view.SurfaceView;
 import android.view.View;
 
 import com.geometry.entity.EntityGenerator;
+import com.geometry.figure.Figure;
 import com.geometry.thread.AnimationThread;
 import com.geometry.thread.DrawThread;
+import com.geometry.thread.EntityThread;
+import com.geometry.thread.IntersectionThread;
+import com.geometry.thread.RecordThread;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 
 // TODO: 26.07.2019 как правильно делать lockCanvas???
 // TODO: 26.07.2019 check float cast priority
@@ -24,22 +29,22 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     private static final String LOG_TAG = CustomSurfaceView.class.getSimpleName();
 
-    private SurfaceHolder surfaceHolder;
-
     private DrawThread drawThread;
     private AnimationThread animationThread;
+    private EntityThread entityThread;
+    private IntersectionThread intersectionThread;
+    private RecordThread recordThread;
+    private Consumer<Record> onGameOver;
 
-    public CustomSurfaceView(Context context, Runnable onGameOver) {
+    public CustomSurfaceView(Context context) {
         super(context);
-//        setFocusable(true);//возможно без этого не будут открываться панели при смене ориентации
 
-        if (surfaceHolder == null) {
-            surfaceHolder = getHolder();
-            surfaceHolder.addCallback(this);
-        }
-
+        getHolder().addCallback(this);
         setOnTouchListener(this);
-        animationThread = new AnimationThread(onGameOver);
+    }
+
+    public void setOnGameOver(Consumer<Record> onGameOver) {
+        this.onGameOver = onGameOver;
     }
 
     @Override
@@ -55,7 +60,6 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
         while (retry) {
             Canvas canvas = surfaceHolder.lockCanvas();
             if (canvas != null) {
-                //try {
                 Global.player = Global.entityGenerator.generatePlayer(
                         new PointF(
                                 (float) ((Global.width = canvas.getWidth()) / 2),
@@ -64,17 +68,33 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
                 );
                 Global.fieldSquare = Global.width * Global.height;
                 retry = false;
-                //} finally {
+
                 surfaceHolder.unlockCanvasAndPost(canvas);
-                //}
             }
         }
 
         Log.i(LOG_TAG, "width=" + Global.width + " height=" + Global.height);
 
-        drawThread = new DrawThread(getHolder());//fixme surfaceHolder???
+        drawThread = new DrawThread();
+        drawThread.setSurfaceHolder(getHolder());//fixme surfaceHolder???
         drawThread.start();
+
+        animationThread = new AnimationThread();
         animationThread.start();
+
+        entityThread = new EntityThread();
+        entityThread.setHandlerFutureTask(animationThread.getHandlerFutureTask());
+        entityThread.start();
+
+        recordThread = new RecordThread();
+        recordThread.start();
+
+        intersectionThread = new IntersectionThread();
+        intersectionThread.setHandlerFutureTask(animationThread.getHandlerFutureTask());
+        intersectionThread.setRecordFutureTask(recordThread.getRecordFutureTask());
+        intersectionThread.setOnGameOver(onGameOver);
+        intersectionThread.setCount(recordThread::count);
+        intersectionThread.start();
     }
 
     @Override
@@ -83,12 +103,30 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        intersectionThread.cancel();
+        recordThread.count(// FIXME: 05.08.2019 как то не очень
+                new Figure() {
+
+                    @Override
+                    protected void updateComponents() {
+                    }
+
+                    @Override
+                    public void draw(Canvas canvas) {
+                    }
+                }
+        );
+        entityThread.cancel();
+        animationThread.cancel();
         drawThread.cancel();
-        animationThread.cancel();//join?
 
         boolean retry = true;
         while (retry)
             try {
+                intersectionThread.join();
+                recordThread.join();
+                entityThread.join();
+                animationThread.join();
                 drawThread.join();
                 retry = false;
             } catch (InterruptedException e) {
@@ -104,15 +142,12 @@ public class CustomSurfaceView extends SurfaceView implements SurfaceHolder.Call
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (v instanceof SurfaceView)
-            switch (event.getAction()) {//todo check
+            switch (event.getAction()) {
                 default:
                     Global.player.lock.lock();
-                    //try {
                     Global.player.figure.cpoint.x += event.getX() - x;
                     Global.player.figure.cpoint.y += event.getY() - y;
-                    //} finally {
                     Global.player.lock.unlock();
-                    //}
                 case MotionEvent.ACTION_DOWN:
                     x = event.getX();
                     y = event.getY();

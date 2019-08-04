@@ -2,7 +2,6 @@ package com.geometry.thread;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.view.SurfaceHolder;
 
 import com.geometry.Global;
@@ -12,7 +11,7 @@ public class DrawThread extends Thread {
     private boolean running;
     private SurfaceHolder surfaceHolder;
 
-    public DrawThread(SurfaceHolder surfaceHolder) {
+    public void setSurfaceHolder(SurfaceHolder surfaceHolder) {
         this.surfaceHolder = surfaceHolder;
     }
 
@@ -22,11 +21,9 @@ public class DrawThread extends Thread {
         while (running) {
             Canvas canvas = surfaceHolder.lockCanvas();
             if (canvas != null) {
-                //try {
                 canvas.drawColor(Color.BLACK);
 
                 Global.player.lock.lock();
-                //try {
                 if (Global.player.figure.cpoint.x < 0)
                     Global.player.figure.cpoint.x = 0;
                 if (Global.player.figure.cpoint.y < 0)
@@ -36,24 +33,17 @@ public class DrawThread extends Thread {
                 if (Global.player.figure.cpoint.y > Global.height)
                     Global.player.figure.cpoint.y = Global.height;
                 Global.player.figure.draw(canvas);
-                //} finally {
                 Global.player.lock.unlock();
-                //}
 
                 Global.enemiesLock.readLock().lock();
-                //try {
                 Global.enemies.forEach(
                         enemy -> {
                             enemy.lock.lock();
-                            //try {
                             if (enemy.alive)
                                 enemy.figure.draw(canvas);
-                            //} finally {
                             enemy.lock.unlock();
-                            //}
                         }
                 );
-                //} finally {
                 Global.enemiesLock.readLock().unlock();
 
                 Global.bonusesLock.readLock().lock();

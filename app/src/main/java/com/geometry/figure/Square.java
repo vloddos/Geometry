@@ -41,4 +41,8 @@ public class Square extends Figure {
         clone.halfSide = halfSide;
         return clone;
     }
+
+    public float getHalfSide() {
+        return halfSide;
+    }
 }

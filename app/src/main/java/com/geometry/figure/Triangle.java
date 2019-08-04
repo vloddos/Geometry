@@ -45,4 +45,12 @@ public class Triangle extends Figure {
         clone.h = h;
         return clone;
     }
+
+    public float getSide() {
+        return side;
+    }
+
+    public float getH() {
+        return h;
+    }
 }
