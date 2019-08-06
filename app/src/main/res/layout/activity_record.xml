@@ -23,7 +23,6 @@
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -32,7 +31,6 @@
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/textView9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -41,7 +39,6 @@
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -50,7 +47,6 @@
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/textView8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -59,7 +55,6 @@
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/textView10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -93,7 +88,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="12987"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -102,7 +96,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="25"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -111,7 +104,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="25"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -120,7 +112,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="27"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -129,7 +120,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="77"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -159,7 +149,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="102454"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -168,7 +157,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="156"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -177,7 +165,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="225"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -186,7 +173,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="123"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 
@@ -195,7 +181,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="657"
             android:textColor="#FFFFFF"
             android:textSize="18sp" />
 

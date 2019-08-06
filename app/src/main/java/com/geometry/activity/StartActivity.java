@@ -8,6 +8,9 @@ import androidx.annotation.Nullable;
 
 import com.geometry.R;
 
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class StartActivity extends BaseActivity {
 
     private static final int LOSE = 0;
@@ -16,6 +19,7 @@ public class StartActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+        ButterKnife.bind(this);
     }
 
     @Override
@@ -38,14 +42,16 @@ public class StartActivity extends BaseActivity {
                 );
     }
 
-    public void start(View view) {
+    @OnClick(R.id.start)
+    void start(View view) {
         startActivityForResult(
                 new Intent(this, MainActivity.class),
                 LOSE
         );
     }
 
-    public void records(View view) {
+    @OnClick(R.id.records)
+    void records(View view) {
         startActivity(new Intent(this, RecordActivity.class));
     }
 }

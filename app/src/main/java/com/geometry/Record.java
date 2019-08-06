@@ -14,17 +14,6 @@ public class Record implements Serializable {
     public int triangles;
     public int total;
 
-    public Record() {
-    }
-
-    public Record(double square, int circles, int squares, int triangles, int total) {
-        this.square = square;
-        this.circles = circles;
-        this.squares = squares;
-        this.triangles = triangles;
-        this.total = total;
-    }
-
     @NonNull
     @Override
     public String toString() {

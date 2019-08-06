@@ -10,10 +10,10 @@
     tools:context=".activity.StartActivity">
 
     <TextView
+        android:id="@+id/start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:onClick="start"
         android:text="START"
         android:textColor="#FFFFFF"
         android:textSize="30sp" />
@@ -25,10 +25,10 @@
         android:background="?android:attr/listDivider" />
 
     <TextView
+        android:id="@+id/records"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:onClick="records"
         android:text="RECORDS"
         android:textColor="#FFFFFF"
         android:textSize="30sp" />

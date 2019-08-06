@@ -7,15 +7,19 @@ import android.widget.LinearLayout;
 import com.geometry.CustomSurfaceView;
 import com.geometry.R;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends BaseActivity {
 
-    private LinearLayout linearLayout;
+    @BindView(R.id.linearLayout)
+    LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        linearLayout = findViewById(R.id.linearLayout);
+        ButterKnife.bind(this);
     }
 
     @Override
